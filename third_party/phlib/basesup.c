@@ -546,7 +546,8 @@ SIZE_T PhCountStringZ(
     _In_ PWSTR String
     )
 {
-    if (PhpVectorLevel >= PH_VECTOR_LEVEL_SSE2)
+#if !defined(_ARM_)
+  if (PhpVectorLevel >= PH_VECTOR_LEVEL_SSE2)
     {
         PWSTR p;
         ULONG unaligned;
@@ -584,7 +585,8 @@ SIZE_T PhCountStringZ(
         }
     }
     else
-    {
+#endif // !defined(_ARM_)
+  {
         return wcslen(String);
     }
 }
@@ -1223,6 +1225,7 @@ BOOLEAN PhEqualStringRef(
     s1 = String1->Buffer;
     s2 = String2->Buffer;
 
+#if !defined(_ARM_)
     if (PhpVectorLevel >= PH_VECTOR_LEVEL_SSE2)
     {
         length = l1 / 16;
@@ -1262,6 +1265,7 @@ BOOLEAN PhEqualStringRef(
         l1 = (l1 & 15) / sizeof(WCHAR);
     }
     else
+#endif // !defined(_ARM_)
     {
         length = l1 / sizeof(ULONG_PTR);
 
@@ -1359,7 +1363,8 @@ ULONG_PTR PhFindCharInStringRef(
 
     if (!IgnoreCase)
     {
-        if (PhpVectorLevel >= PH_VECTOR_LEVEL_SSE2)
+#if !defined(_ARM_)
+      if (PhpVectorLevel >= PH_VECTOR_LEVEL_SSE2)
         {
             SIZE_T length16;
 
@@ -1388,6 +1393,8 @@ ULONG_PTR PhFindCharInStringRef(
                 } while (--length16 != 0);
             }
         }
+#endif // !defined(_ARM_)
+
 
         if (length != 0)
         {
@@ -1445,7 +1452,9 @@ ULONG_PTR PhFindLastCharInStringRef(
 
     if (!IgnoreCase)
     {
-        if (PhpVectorLevel >= PH_VECTOR_LEVEL_SSE2)
+
+#if !defined(_ARM_)
+      if (PhpVectorLevel >= PH_VECTOR_LEVEL_SSE2)
         {
             SIZE_T length16;
 
@@ -1477,6 +1486,7 @@ ULONG_PTR PhFindLastCharInStringRef(
                 buffer += 16 / sizeof(WCHAR);
             }
         }
+#endif // !defined(_ARM_)
 
         if (length != 0)
         {
@@ -5868,10 +5878,12 @@ VOID PhFillMemoryUlong(
     _In_ SIZE_T Count
     )
 {
-    __m128i pattern;
+#if !defined(_ARM_)
+  __m128i pattern;
     SIZE_T count;
 
     if (PhpVectorLevel < PH_VECTOR_LEVEL_SSE2)
+#endif // !defined(_ARM_)
     {
         if (Count != 0)
         {
@@ -5884,6 +5896,7 @@ VOID PhFillMemoryUlong(
         return;
     }
 
+#if !defined(_ARM_)
     if ((ULONG_PTR)Memory & 0xf)
     {
         switch ((ULONG_PTR)Memory & 0xf)
@@ -5936,6 +5949,7 @@ VOID PhFillMemoryUlong(
         *Memory++ = Value;
         break;
     }
+#endif // !defined(_ARM_)
 }
 
 /**
@@ -5951,17 +5965,19 @@ VOID PhDivideSinglesBySingle(
     _In_ SIZE_T Count
     )
 {
-    PFLOAT endA;
+#if !defined(_ARM_)
+  PFLOAT endA;
     __m128 b;
 
     if (PhpVectorLevel < PH_VECTOR_LEVEL_SSE2)
+#endif // !defined(_ARM_)
     {
         while (Count--)
             *A++ /= B;
 
         return;
     }
-
+#if !defined(_ARM_)
     if ((ULONG_PTR)A & 0xf)
     {
         switch ((ULONG_PTR)A & 0xf)
@@ -6020,4 +6036,5 @@ VOID PhDivideSinglesBySingle(
         *A++ /= B;
         break;
     }
+#endif // !defined(_ARM_)
 }

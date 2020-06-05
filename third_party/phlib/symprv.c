@@ -1683,6 +1683,7 @@ NTSTATUS PhWalkThreadStack(
 SkipAmd64Stack:
 #endif
 
+#if !defined(_ARM_)
     // x86/WOW64 stack walk.
     if (Flags & PH_WALK_I386_STACK)
     {
@@ -1757,8 +1758,8 @@ SkipAmd64Stack:
             stackFrame.AddrStack.Offset = PtrToUlong(threadStackFrame.StackAddress);
         }
     }
-
 SkipI386Stack:
+#endif // !defined(_ARM_)
 
 ResumeExit:
     if (suspended)
